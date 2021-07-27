@@ -8,7 +8,7 @@ To get started:
 ```
 1. git clone https://github.com/JohnnyMirza/ccloudauditlogs_splunk.git
 2. cd ccloudauditlogs_splunk
-2. edit the .env file and fill in your credentials. To get the details Login to Confluent Cloud then to your Environment, and follow steps below:
+3. edit the .env file and fill in your credentials. To get the details Login to Confluent Cloud then to your Environment, and follow steps below:
 -CLOUD_URL: cluster->Settings->Bootstrap server
 -CLOUD_TOKEN: cluster->API keys
 -CLOUD_SECRET: cluster->API keys
