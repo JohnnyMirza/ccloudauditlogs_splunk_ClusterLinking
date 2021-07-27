@@ -1,0 +1,22 @@
+[app/ui]
+version = 8.2.1
+modtime = 1627268068.916382000
+
+[app/launcher]
+version = 8.2.1
+modtime = 1627268068.917055000
+
+[views/audit_log_overview]
+owner = admin
+version = 8.2.1
+modtime = 1627268373.509707000
+
+[props/ccloud_audit_logs]
+owner = admin
+version = 8.2.1
+modtime = 1627269830.392299000
+
+[views/audit_roles]
+owner = admin
+version = 8.2.1
+modtime = 1627269967.410224000

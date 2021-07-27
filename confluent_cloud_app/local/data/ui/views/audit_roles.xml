@@ -1,0 +1,108 @@
+<form theme="dark">
+  <label>Confluent Audit Role Assignments</label>
+  <description>Audit logs provide a way to capture, protect, and preserve authorization activity into topics in Kafka clusters on Confluent Platform using Confluent Server Authorizer. Specifically, audit logs record the runtime decisions of the permission checks that occur as users attempt to take actions that are protected by ACLs and RBAC. Auditable events are recorded in chronological order, although it is possible for a consumer of audit log messages to fetch them out of order.</description>
+  <fieldset submitButton="false">
+    <input type="time" token="time_tok">
+      <label>Time</label>
+      <default>
+        <earliest>-60m@m</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="user_tok">
+      <label>UserName</label>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <initialValue>*</initialValue>
+      <fieldForLabel>user</fieldForLabel>
+      <fieldForValue>user</fieldForValue>
+      <search>
+        <query>index=main | rename "data.authenticationInfo.principal" as user | dedup  user | table user</query>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+    <input type="dropdown" token="cluster_tok">
+      <label>Cluster_ID</label>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <initialValue>*</initialValue>
+      <fieldForLabel>cluster_id</fieldForLabel>
+      <fieldForValue>cluster_id</fieldForValue>
+      <search>
+        <query>index=main | rename "data.authorizationInfo.rbacAuthorization.scope.clusters.kafka-cluster" as cluster_id | dedup  cluster_id | table cluster_id</query>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Kafka Clusters</title>
+      <chart>
+        <search>
+          <query>index=main "data.authenticationInfo.principal"="*" | rename "data.authorizationInfo.rbacAuthorization.scope.clusters.kafka-cluster" as Cluster_Id | top limit=20 Cluster_Id</query>
+          <earliest>$time_tok.earliest$</earliest>
+          <latest>$time_tok.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <drilldown>
+          <set token="cluster_tok">$click.value$</set>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>index=main "data.authenticationInfo.principal"="$user_tok$" data.authorizationInfo.rbacAuthorization.scope.clusters.kafka-cluster="$cluster_tok$" 
+| stats values(data.authorizationInfo.rbacAuthorization.role) values(data.authorizationInfo.operation) as granted by data.authorizationInfo.rbacAuthorization.scope.clusters.kafka-cluster, data.authenticationInfo.principal</query>
+          <earliest>$time_tok.earliest$</earliest>
+          <latest>$time_tok.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>
